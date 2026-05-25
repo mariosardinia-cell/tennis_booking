@@ -83,7 +83,7 @@ async function loadSlots() {
 }
 
 function openBooking(court, time) {
-  selectedSlot = { court, time, date: toISO(currentDate) };
+  selectedSlot = { court, start_time: time, date: toISO(currentDate) };
   document.getElementById('bookingInfo').textContent =
     `Campo ${court}  ·  ${labelDate(currentDate)} ${subDate(currentDate)}  ·  ore ${time}`;
   document.getElementById('bookingForm').classList.remove('d-none');
