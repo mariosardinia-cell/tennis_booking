@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Admin – Prenotazioni{% endblock %}
+
+{% block nav_extra %}
+<div class="ms-auto d-flex align-items-center gap-2">
+  <button class="btn btn-outline-light btn-sm" id="enablePushBtn" title="Attiva notifiche push">
+    <i class="bi bi-bell"></i>
+  </button>
+  <a href="/admin/logout" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-box-arrow-right"></i>
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <h5 class="mb-0 fw-bold">Prenotazioni</h5>
+  <span class="badge bg-warning text-dark ms-2 d-none" id="pendingBadge">0</span>
+  <a href="/" class="btn btn-outline-secondary btn-sm ms-auto">
+    <i class="bi bi-calendar3"></i> Calendario
+  </a>
+</div>
+
+<!-- Filter tabs -->
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <a class="nav-link active" href="#" data-status="pending">
+      In attesa <span class="badge bg-warning text-dark ms-1" id="tabBadge">0</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#" data-status="confirmed">Confermate</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#" data-status="all">Tutte</a>
+  </li>
+</ul>
+
+<div id="bookingsList">
+  <div class="text-center py-4 text-muted">
+    <span class="spinner-border spinner-border-sm me-2"></span>Caricamento...
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Conferma prenotazione</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmInfo" class="mb-3"></p>
+        <div class="alert alert-success py-2 small">
+          <i class="bi bi-whatsapp me-1"></i>
+          Dopo la conferma si aprirà <strong>WhatsApp</strong> con il messaggio precompilato.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+        <button type="button" class="btn btn-success" id="doConfirm">
+          <i class="bi bi-check-lg me-1"></i>Conferma e apri WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

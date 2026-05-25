@@ -1,0 +1,9 @@
+{
+  "name": "Tennis Club – Prenotazioni",
+  "short_name": "Tennis",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#198754",
+  "description": "Prenota un campo da tennis"
+}

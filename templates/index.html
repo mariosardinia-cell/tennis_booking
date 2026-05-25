@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Prenota un campo – Tennis Club{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <div>
+    <h5 class="mb-0 fw-bold">Disponibilità campi</h5>
+    <small class="text-muted">Clicca su uno slot verde per prenotare</small>
+  </div>
+  <a href="/admin" class="btn btn-outline-secondary btn-sm ms-auto">
+    <i class="bi bi-gear"></i>
+  </a>
+</div>
+
+<!-- Date navigation -->
+<div class="d-flex align-items-center gap-2 mb-3">
+  <button class="btn btn-outline-secondary" id="prevDay">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+  <div class="flex-grow-1 text-center">
+    <div class="fw-bold" id="dateDisplay">Oggi</div>
+    <small class="text-muted" id="dateSubDisplay"></small>
+  </div>
+  <button class="btn btn-outline-secondary" id="nextDay">
+    <i class="bi bi-chevron-right"></i>
+  </button>
+</div>
+
+<!-- Legend -->
+<div class="d-flex gap-3 mb-3 small">
+  <span class="d-flex align-items-center gap-1"><span class="dot bg-success"></span> Libero</span>
+  <span class="d-flex align-items-center gap-1"><span class="dot bg-warning"></span> In attesa</span>
+  <span class="d-flex align-items-center gap-1"><span class="dot bg-danger"></span> Occupato</span>
+</div>
+
+<!-- Court grid -->
+<div class="table-responsive rounded border">
+  <table class="table table-bordered court-grid mb-0">
+    <thead class="table-success">
+      <tr>
+        <th class="time-col text-center">Orario</th>
+        <th class="text-center">Campo 1</th>
+        <th class="text-center">Campo 2</th>
+        <th class="text-center">Campo 3</th>
+        <th class="text-center">Campo 4</th>
+      </tr>
+    </thead>
+    <tbody id="gridBody">
+      <tr><td colspan="5" class="text-center py-4 text-muted">
+        <span class="spinner-border spinner-border-sm me-2"></span>Caricamento...
+      </td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Booking Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">🎾 Prenota</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-success py-2 mb-3" id="bookingInfo"></div>
+        <form id="bookingForm" novalidate>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nome e Cognome <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="bookName" required autocomplete="name"
+                   placeholder="Mario Rossi">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Numero di telefono <span class="text-danger">*</span></label>
+            <input type="tel" class="form-control" id="bookPhone" required autocomplete="tel"
+                   placeholder="3331234567">
+          </div>
+          <div class="alert alert-info small mb-0 py-2">
+            <i class="bi bi-info-circle-fill me-1"></i>
+            Pagamento in loco. Riceverai conferma via <strong>WhatsApp</strong>.
+          </div>
+        </form>
+        <div id="bookingResult" class="mt-3 d-none"></div>
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+        <button type="button" class="btn btn-success" id="submitBook">
+          <i class="bi bi-send-fill me-1"></i>Invia richiesta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Accesso Admin – Tennis Club{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-12 col-sm-8 col-md-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-success text-white text-center py-3">
+        <h5 class="mb-0 fw-bold">🎾 Pannello Admin</h5>
+      </div>
+      <div class="card-body p-4">
+        {% if error %}
+        <div class="alert alert-danger py-2">
+          <i class="bi bi-exclamation-circle-fill me-1"></i>{{ error }}
+        </div>
+        {% endif %}
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Password</label>
+            <input type="password" class="form-control" name="password" autofocus>
+          </div>
+          <button type="submit" class="btn btn-success w-100">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Accedi
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
