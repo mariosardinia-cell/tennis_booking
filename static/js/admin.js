@@ -214,7 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
     try {
       const resp = await fetch('/api/admin/test-email');
-      const data = await resp.json();
+      const text = await resp.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { ok: false, error: 'Risposta non valida: ' + text.substring(0, 120) }; }
       const toastEl = document.getElementById('emailToast');
       const toastBody = document.getElementById('emailToastBody');
       if (data.ok) {
@@ -224,9 +226,9 @@ document.addEventListener('DOMContentLoaded', () => {
         toastEl.className = 'toast align-items-center border-0 text-bg-danger';
         toastBody.innerHTML = '<i class="bi bi-exclamation-circle-fill me-1"></i>' + (data.error || 'Errore invio email');
       }
-      bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 6000 }).show();
-    } catch {
-      alert('Errore di rete');
+      bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 10000 }).show();
+    } catch(e) {
+      alert('Errore: ' + (e?.message || 'sconosciuto'));
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<i class="bi bi-envelope"></i>';

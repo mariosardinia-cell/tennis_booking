@@ -117,8 +117,8 @@ def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if not session.get('admin'):
-            if request.is_json:
-                return jsonify({'error': 'Unauthorized'}), 401
+            if request.is_json or request.path.startswith('/api/'):
+                return jsonify({'error': 'Sessione scaduta, rieffettua il login'}), 401
             return redirect(url_for('admin_login'))
         return f(*args, **kwargs)
     return decorated
