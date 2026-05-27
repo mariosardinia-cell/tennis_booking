@@ -207,7 +207,96 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('doConfirm').addEventListener('click', confirmBooking);
   document.getElementById('enablePushBtn').addEventListener('click', enablePush);
 
+  // ── Blocchi ──────────────────────────────────────────────
+  const blockModal = new bootstrap.Modal(document.getElementById('blockModal'));
+  const HOURS = Array.from({length: 14}, (_, i) => `${(i+8).toString().padStart(2,'0')}:00`);
+
+  // Popola orari
+  function fillHours() {
+    const from = document.getElementById('blockFrom');
+    const to   = document.getElementById('blockTo');
+    from.innerHTML = HOURS.map(h => `<option>${h}</option>`).join('');
+    to.innerHTML   = HOURS.map(h => `<option>${h}</option>`).join('');
+    to.value = '10:00';
+  }
+
+  document.getElementById('openBlockBtn').addEventListener('click', () => {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('blockDate').value = today;
+    fillHours();
+    loadBlocksForDate(today);
+    blockModal.show();
+  });
+
+  document.getElementById('blockDate').addEventListener('change', e => {
+    loadBlocksForDate(e.target.value);
+  });
+
+  document.getElementById('toggleBlocksBtn').addEventListener('click', () => {
+    const bl = document.getElementById('blocksList');
+    bl.classList.toggle('d-none');
+  });
+
+  async function loadBlocksForDate(dateStr) {
+    const resp   = await fetch('/api/admin/blocks?date=' + dateStr);
+    const blocks = await resp.json();
+    const section = document.getElementById('blocksSection');
+    const list    = document.getElementById('blocksList');
+
+    if (blocks.length === 0) {
+      section.classList.add('d-none');
+      return;
+    }
+    section.classList.remove('d-none');
+    list.innerHTML = blocks.map(b => `
+      <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
+        <span class="small">
+          <strong>Campo ${b.court}</strong> · ${b.start_time}–${b.end_time}
+          ${b.note ? `<span class="text-muted ms-1">(${b.note})</span>` : ''}
+        </span>
+        <button class="btn btn-sm btn-outline-danger py-0 del-block-btn" data-id="${b.id}">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.del-block-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await fetch(`/api/admin/blocks/${btn.dataset.id}`, { method: 'DELETE' });
+        loadBlocksForDate(dateStr);
+      });
+    });
+  }
+
+  document.getElementById('doBlock').addEventListener('click', async () => {
+    const dateStr  = document.getElementById('blockDate').value;
+    const courtVal = parseInt(document.getElementById('blockCourt').value);
+    const from     = document.getElementById('blockFrom').value;
+    const to       = document.getElementById('blockTo').value;
+    const note     = document.getElementById('blockNote').value.trim();
+
+    if (from >= to) { alert('L\'orario di fine deve essere dopo quello di inizio.'); return; }
+
+    const courts = courtVal === 0 ? [1,2,3,4] : [courtVal];
+    for (const c of courts) {
+      // Blocca ogni ora nell'intervallo
+      let h = parseInt(from);
+      const hEnd = parseInt(to);
+      while (h < hEnd) {
+        const st = `${h.toString().padStart(2,'0')}:00`;
+        const et = `${(h+1).toString().padStart(2,'0')}:00`;
+        await fetch('/api/admin/blocks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ court: c, date: dateStr, start_time: st, end_time: et, note })
+        });
+        h++;
+      }
+    }
+    blockModal.hide();
+    loadBookings();
+  });
+
   loadBookings();
-  // Refresh badge and list every 30 s
   setInterval(loadBookings, 30000);
 });

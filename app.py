@@ -70,6 +70,17 @@ def init_db():
                 created_at   TEXT DEFAULT (datetime('now', 'localtime'))
             )
         ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS blocks (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                court      INTEGER NOT NULL,
+                date       TEXT NOT NULL,
+                start_time TEXT NOT NULL,
+                end_time   TEXT NOT NULL,
+                note       TEXT DEFAULT '',
+                created_at TEXT DEFAULT (datetime('now', 'localtime'))
+            )
+        ''')
         conn.commit()
 
 
@@ -128,7 +139,12 @@ def api_slots():
             "SELECT court, start_time, status FROM bookings WHERE date=? AND status!='rejected'",
             (date_str,)
         ).fetchall()
+        block_rows = conn.execute(
+            "SELECT court, start_time FROM blocks WHERE date=?", (date_str,)
+        ).fetchall()
     booked = {f"{r['court']}-{r['start_time']}": r['status'] for r in rows}
+    for b in block_rows:
+        booked[f"{b['court']}-{b['start_time']}"] = 'blocked'
     result = [
         {'court': c, 'time': t, 'status': booked.get(f'{c}-{t}', 'available')}
         for t in get_time_slots() for c in COURTS
@@ -263,6 +279,50 @@ def api_test_email():
         return jsonify({'ok': True, 'message': 'Email inviata! Controlla la casella.'})
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
+
+
+# ─── Blocchi admin ────────────────────────────────────────────────────────────
+
+@app.route('/api/admin/blocks', methods=['GET'])
+@admin_required
+def api_get_blocks():
+    date_str = request.args.get('date', date.today().isoformat())
+    with get_db() as conn:
+        rows = conn.execute(
+            'SELECT * FROM blocks WHERE date=? ORDER BY court, start_time', (date_str,)
+        ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
+@app.route('/api/admin/blocks', methods=['POST'])
+@admin_required
+def api_create_block():
+    data       = request.get_json() or {}
+    court      = data.get('court')
+    date_str   = data.get('date', '')
+    start_time = data.get('start_time', '')
+    end_time   = data.get('end_time', '')
+    note       = data.get('note', '')
+
+    if not all([court, date_str, start_time, end_time]):
+        return jsonify({'error': 'Dati mancanti'}), 400
+
+    with get_db() as conn:
+        conn.execute(
+            'INSERT INTO blocks (court, date, start_time, end_time, note) VALUES (?,?,?,?,?)',
+            (court, date_str, start_time, end_time, note)
+        )
+        conn.commit()
+    return jsonify({'ok': True})
+
+
+@app.route('/api/admin/blocks/<int:bid>', methods=['DELETE'])
+@admin_required
+def api_delete_block(bid):
+    with get_db() as conn:
+        conn.execute('DELETE FROM blocks WHERE id=?', (bid,))
+        conn.commit()
+    return jsonify({'ok': True})
 
 
 @app.route('/api/admin/bookings/<int:bid>', methods=['DELETE'])

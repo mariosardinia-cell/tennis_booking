@@ -72,6 +72,9 @@ async function loadSlots() {
       } else if (status === 'confirmed') {
         td.innerHTML = '<i class="bi bi-x-circle-fill text-danger fs-5"></i>';
         td.title = 'Occupato';
+      } else if (status === 'blocked') {
+        td.innerHTML = '<i class="bi bi-slash-circle text-secondary fs-5"></i>';
+        td.title = 'Non disponibile';
       } else {
         td.innerHTML = '<span class="text-muted">–</span>';
       }

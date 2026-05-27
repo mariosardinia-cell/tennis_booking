@@ -24,6 +24,7 @@ body { background: #f5f7f5; }
 .slot-cell.available:hover { background: #d1f0d8 !important; }
 
 .past-row td { opacity: .4; pointer-events: none; }
+.slot-cell.blocked { background: #f0f0f0 !important; cursor: default; }
 
 /* ── Legend dot ─────────────────────────────────────────── */
 .dot {

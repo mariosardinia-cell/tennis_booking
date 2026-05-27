@@ -16,12 +16,27 @@
 <div class="d-flex align-items-center mb-3">
   <h5 class="mb-0 fw-bold">Prenotazioni</h5>
   <span class="badge bg-warning text-dark ms-2 d-none" id="pendingBadge">0</span>
-  <a href="/" class="btn btn-outline-secondary btn-sm ms-auto">
-    <i class="bi bi-calendar3"></i> Calendario
-  </a>
+  <div class="ms-auto d-flex gap-2">
+    <button class="btn btn-outline-danger btn-sm" id="openBlockBtn">
+      <i class="bi bi-slash-circle me-1"></i>Blocca slot
+    </button>
+    <a href="/" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-calendar3"></i>
+    </a>
+  </div>
 </div>
 
 <!-- Filter tabs -->
+<!-- Blocchi attivi -->
+<div id="blocksSection" class="mb-3 d-none">
+  <div class="card border-danger">
+    <div class="card-header bg-danger text-white py-2 d-flex align-items-center">
+      <span><i class="bi bi-slash-circle me-1"></i>Slot bloccati</span>
+      <button class="btn btn-sm btn-outline-light ms-auto" id="toggleBlocksBtn">Mostra/Nascondi</button>
+    </div>
+    <div id="blocksList" class="card-body py-2"></div>
+  </div>
+</div>
 <ul class="nav nav-tabs mb-3">
   <li class="nav-item">
     <a class="nav-link active" href="#" data-status="pending">
@@ -61,6 +76,53 @@
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
         <button type="button" class="btn btn-success" id="doConfirm">
           <i class="bi bi-check-lg me-1"></i>Conferma e apri WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Block Modal -->
+<div class="modal fade" id="blockModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-slash-circle me-1"></i>Blocca slot</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Data</label>
+          <input type="date" class="form-control" id="blockDate">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Campo</label>
+          <select class="form-select" id="blockCourt">
+            <option value="0">Tutti i campi</option>
+            <option value="1">Campo 1</option>
+            <option value="2">Campo 2</option>
+            <option value="3">Campo 3</option>
+            <option value="4">Campo 4</option>
+          </select>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col">
+            <label class="form-label fw-semibold">Dalle</label>
+            <select class="form-select" id="blockFrom"></select>
+          </div>
+          <div class="col">
+            <label class="form-label fw-semibold">Alle</label>
+            <select class="form-select" id="blockTo"></select>
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-semibold">Nota (opzionale)</label>
+          <input type="text" class="form-control" id="blockNote" placeholder="es. Scuola tennis, Lezione privata...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
+        <button type="button" class="btn btn-danger" id="doBlock">
+          <i class="bi bi-slash-circle me-1"></i>Blocca
         </button>
       </div>
     </div>
