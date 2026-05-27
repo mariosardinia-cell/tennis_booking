@@ -207,6 +207,32 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('doConfirm').addEventListener('click', confirmBooking);
   document.getElementById('enablePushBtn').addEventListener('click', enablePush);
 
+  // ── Test email ────────────────────────────────────────────
+  document.getElementById('testEmailBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('testEmailBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    try {
+      const resp = await fetch('/api/admin/test-email');
+      const data = await resp.json();
+      const toastEl = document.getElementById('emailToast');
+      const toastBody = document.getElementById('emailToastBody');
+      if (data.ok) {
+        toastEl.className = 'toast align-items-center border-0 text-bg-success';
+        toastBody.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>' + (data.message || 'Email inviata!');
+      } else {
+        toastEl.className = 'toast align-items-center border-0 text-bg-danger';
+        toastBody.innerHTML = '<i class="bi bi-exclamation-circle-fill me-1"></i>' + (data.error || 'Errore invio email');
+      }
+      bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 6000 }).show();
+    } catch {
+      alert('Errore di rete');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-envelope"></i>';
+    }
+  });
+
   // ── Blocchi ──────────────────────────────────────────────
   const blockModal = new bootstrap.Modal(document.getElementById('blockModal'));
   const HOURS = Array.from({length: 14}, (_, i) => `${(i+8).toString().padStart(2,'0')}:00`);

@@ -20,6 +20,9 @@
     <button class="btn btn-outline-danger btn-sm" id="openBlockBtn">
       <i class="bi bi-slash-circle me-1"></i>Blocca slot
     </button>
+    <button class="btn btn-outline-secondary btn-sm" id="testEmailBtn" title="Invia email di test">
+      <i class="bi bi-envelope"></i>
+    </button>
     <a href="/" class="btn btn-outline-secondary btn-sm">
       <i class="bi bi-calendar3"></i>
     </a>
@@ -129,6 +132,16 @@
   </div>
 </div>
 {% endblock %}
+
+<!-- Test-email toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1100">
+  <div id="emailToast" class="toast align-items-center border-0" role="alert" aria-live="assertive">
+    <div class="d-flex">
+      <div class="toast-body" id="emailToastBody"></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
