@@ -333,8 +333,13 @@ def _send_email(name, phone, court, date_str, start_time):
     port  = int(os.environ.get('SMTP_PORT', 587))
     user  = os.environ.get('SMTP_USER')
     pwd   = os.environ.get('SMTP_PASS')
-    to    = os.environ.get('ADMIN_EMAIL')
-    if not all([host, user, pwd, to]):
+    to_raw = os.environ.get('ADMIN_EMAIL', '')
+    if not all([host, user, pwd, to_raw]):
+        return
+
+    # Supporta più email separate da virgola: "a@gmail.com,b@gmail.com"
+    recipients = [e.strip() for e in to_raw.split(',') if e.strip()]
+    if not recipients:
         return
 
     body = (
@@ -350,12 +355,12 @@ def _send_email(name, phone, court, date_str, start_time):
     msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = f'🎾 Prenotazione {name} – Campo {court} ore {start_time}'
     msg['From']    = user
-    msg['To']      = to
+    msg['To']      = ', '.join(recipients)
 
     with smtplib.SMTP(host, port) as srv:
         srv.starttls()
         srv.login(user, pwd)
-        srv.send_message(msg)
+        srv.sendmail(user, recipients, msg.as_string())
 
 
 if __name__ == '__main__':
