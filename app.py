@@ -1,12 +1,16 @@
 import os
 import json
 import sqlite3
-import smtplib
 import threading
 from datetime import date, datetime
-from email.mime.text import MIMEText
 from functools import wraps
 from urllib.parse import quote
+
+try:
+    import resend as resend_sdk
+    RESEND_ENABLED = True
+except ImportError:
+    RESEND_ENABLED = False
 
 from flask import (Flask, abort, jsonify, redirect, render_template,
                    request, session, url_for)
@@ -405,20 +409,22 @@ def _send_push(name, court, date_str, start_time):
 
 
 def _send_email(name, phone, court, date_str, start_time):
-    host  = os.environ.get('SMTP_HOST')
-    port  = int(os.environ.get('SMTP_PORT', 587))
-    user  = os.environ.get('SMTP_USER')
-    pwd   = os.environ.get('SMTP_PASS')
-    to_raw = os.environ.get('ADMIN_EMAIL', '')
-    if not all([host, user, pwd, to_raw]):
+    api_key = os.environ.get('RESEND_API_KEY')
+    to_raw  = os.environ.get('ADMIN_EMAIL', '')
+    if not api_key or not to_raw:
         return
 
-    # Supporta più email separate da virgola: "a@gmail.com,b@gmail.com"
+    if not RESEND_ENABLED:
+        raise RuntimeError('Libreria resend non installata')
+
     recipients = [e.strip() for e in to_raw.split(',') if e.strip()]
     if not recipients:
         return
 
-    body = (
+    resend_sdk.api_key = api_key
+
+    app_url = os.environ.get('APP_URL', 'http://localhost:5000')
+    body_text = (
         f'Nuova richiesta di prenotazione:\n\n'
         f'Nome:     {name}\n'
         f'Telefono: {phone}\n'
@@ -426,17 +432,15 @@ def _send_email(name, phone, court, date_str, start_time):
         f'Data:     {format_date_it(date_str)}\n'
         f'Ora:      {start_time}\n\n'
         f'Apri il pannello admin per confermare:\n'
-        f'{os.environ.get("APP_URL", "http://localhost:5000")}/admin'
+        f'{app_url}/admin'
     )
-    msg = MIMEText(body, 'plain', 'utf-8')
-    msg['Subject'] = f'🎾 Prenotazione {name} – Campo {court} ore {start_time}'
-    msg['From']    = user
-    msg['To']      = ', '.join(recipients)
 
-    with smtplib.SMTP(host, port) as srv:
-        srv.starttls()
-        srv.login(user, pwd)
-        srv.sendmail(user, recipients, msg.as_string())
+    resend_sdk.Emails.send({
+        'from':    os.environ.get('RESEND_FROM', 'Tennis <noreply@resend.dev>'),
+        'to':      recipients,
+        'subject': f'🎾 Prenotazione {name} – Campo {court} ore {start_time}',
+        'text':    body_text,
+    })
 
 
 if __name__ == '__main__':
