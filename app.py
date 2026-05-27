@@ -2,6 +2,7 @@ import os
 import json
 import sqlite3
 import smtplib
+import threading
 from datetime import date, datetime
 from email.mime.text import MIMEText
 from functools import wraps
@@ -178,7 +179,12 @@ def api_book():
         )
         conn.commit()
 
-    _notify_admin(name, phone, court, date_str, start_time)
+    # Notifiche in background — non bloccano la risposta
+    threading.Thread(
+        target=_notify_admin,
+        args=(name, phone, court, date_str, start_time),
+        daemon=True
+    ).start()
     return jsonify({'ok': True, 'message': 'Richiesta inviata! Ti confermeremo a breve via WhatsApp.'})
 
 
