@@ -255,6 +255,16 @@ def api_reject(bid):
     return jsonify({'ok': True})
 
 
+@app.route('/api/admin/test-email')
+@admin_required
+def api_test_email():
+    try:
+        _send_email('Test', '3331234567', 1, date.today().isoformat(), '10:00')
+        return jsonify({'ok': True, 'message': 'Email inviata! Controlla la casella.'})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
 @app.route('/api/admin/bookings/<int:bid>', methods=['DELETE'])
 @admin_required
 def api_delete_booking(bid):
