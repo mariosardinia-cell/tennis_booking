@@ -279,8 +279,12 @@ def api_reject(bid):
 @admin_required
 def api_test_email():
     try:
-        _send_email('Test', '3331234567', 1, date.today().isoformat(), '10:00')
-        return jsonify({'ok': True, 'message': 'Email inviata! Controlla la casella.'})
+        result = _send_email('Test', '3331234567', 1, date.today().isoformat(), '10:00')
+        to_raw = os.environ.get('ADMIN_EMAIL', '')
+        return jsonify({
+            'ok': True,
+            'message': f'Email inviata a {to_raw}. ID: {result}. Controlla anche lo SPAM.'
+        })
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
 
@@ -411,15 +415,17 @@ def _send_push(name, court, date_str, start_time):
 def _send_email(name, phone, court, date_str, start_time):
     api_key = os.environ.get('RESEND_API_KEY')
     to_raw  = os.environ.get('ADMIN_EMAIL', '')
-    if not api_key or not to_raw:
-        return
 
     if not RESEND_ENABLED:
         raise RuntimeError('Libreria resend non installata')
+    if not api_key:
+        raise RuntimeError('RESEND_API_KEY non impostata su Railway')
+    if not to_raw:
+        raise RuntimeError('ADMIN_EMAIL non impostata su Railway')
 
     recipients = [e.strip() for e in to_raw.split(',') if e.strip()]
     if not recipients:
-        return
+        raise RuntimeError('ADMIN_EMAIL vuota o non valida')
 
     resend_sdk.api_key = api_key
 
@@ -435,8 +441,8 @@ def _send_email(name, phone, court, date_str, start_time):
         f'{app_url}/admin'
     )
 
-    resend_sdk.Emails.send({
-        'from':    os.environ.get('RESEND_FROM', 'Tennis <noreply@resend.dev>'),
+    return resend_sdk.Emails.send({
+        'from':    os.environ.get('RESEND_FROM', 'Tennis <onboarding@resend.dev>'),
         'to':      recipients,
         'subject': f'🎾 Prenotazione {name} – Campo {court} ore {start_time}',
         'text':    body_text,
