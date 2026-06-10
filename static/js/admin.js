@@ -4,7 +4,7 @@ const MONTHS_SHORT = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott
 const MONTHS_FULL  = ['gennaio','febbraio','marzo','aprile','maggio','giugno',
                       'luglio','agosto','settembre','ottobre','novembre','dicembre'];
 
-let currentStatus    = 'pending';
+let currentStatus    = 'confirmed';
 let pendingToConfirm = null;
 let confirmModal     = null;
 

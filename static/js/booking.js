@@ -131,7 +131,7 @@ async function submitBooking() {
       resultDiv.innerHTML = `
         <div class="alert alert-success">
           <i class="bi bi-check-circle-fill me-1"></i>
-          <strong>Richiesta inviata!</strong><br>${data.message}
+          <strong>Prenotazione confermata!</strong><br>${data.message}
         </div>`;
       loadSlots();
     } else {

@@ -194,7 +194,7 @@ def api_book():
             return jsonify({'error': 'Hai già una prenotazione attiva. Contattaci per modificarla.'}), 409
 
         conn.execute(
-            'INSERT INTO bookings (name,phone,court,date,start_time,end_time) VALUES (?,?,?,?,?,?)',
+            "INSERT INTO bookings (name,phone,court,date,start_time,end_time,status) VALUES (?,?,?,?,?,?,'confirmed')",
             (name, phone, court, date_str, start_time, end_time)
         )
         conn.commit()
@@ -205,7 +205,7 @@ def api_book():
         args=(name, phone, court, date_str, start_time),
         daemon=True
     ).start()
-    return jsonify({'ok': True, 'message': 'Richiesta inviata! Ti confermeremo a breve via WhatsApp.'})
+    return jsonify({'ok': True, 'message': 'Prenotazione confermata! Il campo è bloccato per te.'})
 
 
 # ─── Admin routes ─────────────────────────────────────────────────────────────
@@ -384,7 +384,7 @@ def _send_push(name, court, date_str, start_time):
         return
 
     payload = json.dumps({
-        'title': '🎾 Nuova prenotazione!',
+        'title': '🎾 Nuova prenotazione confermata',
         'body':  f'{name} · Campo {court} · {format_date_it(date_str)} ore {start_time}'
     })
 
@@ -431,13 +431,13 @@ def _send_email(name, phone, court, date_str, start_time):
 
     app_url = os.environ.get('APP_URL', 'http://localhost:5000')
     body_text = (
-        f'Nuova richiesta di prenotazione:\n\n'
+        f'Nuova prenotazione confermata automaticamente:\n\n'
         f'Nome:     {name}\n'
         f'Telefono: {phone}\n'
         f'Campo:    {court}\n'
         f'Data:     {format_date_it(date_str)}\n'
         f'Ora:      {start_time}\n\n'
-        f'Apri il pannello admin per confermare:\n'
+        f'Se necessario puoi annullarla dal pannello admin:\n'
         f'{app_url}/admin'
     )
 
