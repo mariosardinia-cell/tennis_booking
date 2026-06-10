@@ -106,11 +106,14 @@ function renderBookings(bookings) {
         </div>` : ''}
 
         ${b.status === 'confirmed' ? `
-        <div class="mt-2">
+        <div class="mt-2 d-flex gap-2 flex-wrap">
           <a href="${waUrl(b.phone, b.name, b.court, b.date, b.start_time)}"
              target="_blank" class="btn btn-sm btn-outline-success">
             <i class="bi bi-whatsapp me-1"></i>Invia messaggio WhatsApp
           </a>
+          <button class="btn btn-sm btn-outline-danger cancel-btn" data-id="${b.id}">
+            <i class="bi bi-x-circle me-1"></i>Annulla prenotazione
+          </button>
         </div>` : ''}
       </div>
     </div>
@@ -129,6 +132,16 @@ function renderBookings(bookings) {
   document.querySelectorAll('.reject-btn').forEach(btn => {
     btn.addEventListener('click', () => rejectBooking(parseInt(btn.dataset.id)));
   });
+
+  document.querySelectorAll('.cancel-btn').forEach(btn => {
+    btn.addEventListener('click', () => cancelBooking(parseInt(btn.dataset.id)));
+  });
+}
+
+async function cancelBooking(id) {
+  if (!confirm('Annullare questa prenotazione? Lo slot tornerà disponibile per altri clienti.')) return;
+  await fetch(`/api/admin/bookings/${id}`, { method: 'DELETE' });
+  loadBookings();
 }
 
 async function confirmBooking() {
